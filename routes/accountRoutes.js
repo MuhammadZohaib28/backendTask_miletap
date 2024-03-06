@@ -3,7 +3,6 @@ const express = require("express");
 const { default: Account } = require("../model/Account");
 const router = express.Router();
 
-
 // Create Account
 router.post("/", async (req, res) => {
   try {
