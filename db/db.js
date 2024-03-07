@@ -2,7 +2,13 @@
 const sqlite3 = require("sqlite3").verbose();
 const config = require("../config.js");
 
-const db = new sqlite3.Database(config.DATABASE_PATH);
+const db = new sqlite3.Database(config.DATABASE_PATH, (err) => {
+  if (err) {
+    console.error("Error connecting to database:", err.message);
+  } else {
+    console.log("Connected to the SQLite database.");
+  }
+});
 
 // Create User and Account tables if not exists
 db.serialize(() => {
