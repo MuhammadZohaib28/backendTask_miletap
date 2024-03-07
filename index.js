@@ -5,18 +5,22 @@ const mongoose = require("mongoose");
 const accountRoutes = require("./routes/accountRoutes.js");
 const authRoutes = require("./routes/authRoutes");
 const config = require("./config");
+const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-mongoose
-  .connect(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("Connected to MongoDB");
-  });
+// Connect to SQLite database
+let db = new sqlite3.Database(
+  "./db/database.db",
+  sqlite3.OPEN_READWRITE,
+  (err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log("Connected to the SQLite database.");
+  }
+);
 
 app.use(bodyParser.json());
 
