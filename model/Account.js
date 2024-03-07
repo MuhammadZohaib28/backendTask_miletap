@@ -1,18 +1,33 @@
 // models/Account.js
-const mongoose = require("mongoose");
+const db = require("../db/db.js");
 
-const accountSchema = new mongoose.Schema(
-  {
-    first_name: String,
-    last_name: String,
-    email: { type: String, unique: true },
-    phone: String,
-    password: String,
-    birthday: String,
+const Account = {
+  async create(accountData) {
+    try {
+      const { first_name, last_name, email, phone, password, birthday } =
+        accountData;
+      await db.run(
+        "INSERT INTO Account (first_name, last_name, email, phone, password, birthday) VALUES (?, ?, ?, ?, ?, ?)",
+        [first_name, last_name, email, phone, password, birthday]
+      );
+      return true;
+    } catch (error) {
+      console.error("Error creating account:", error);
+      return false;
+    }
   },
-  { timestamps: true }
-);
 
-const Account = mongoose.model("Account", accountSchema);
+  async findAll(limit = 10) {
+    return new Promise((resolve, reject) => {
+      db.all("SELECT * FROM Account LIMIT ?", [limit], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  },
+};
 
 module.exports = Account;

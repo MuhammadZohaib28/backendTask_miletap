@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 // Connect to SQLite database
 let db = new sqlite3.Database(
-  "./db/database.db",
+  "./database.db",
   sqlite3.OPEN_READWRITE,
   (err) => {
     if (err) {

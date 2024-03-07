@@ -1,64 +1,42 @@
 // routes/accountRoutes.js
 const express = require("express");
-const { default: Account } = require("../model/Account");
 const router = express.Router();
+const Account = require("../model/Account.js");
 
 // Create Account
 router.post("/", async (req, res) => {
   try {
     const { first_name, last_name, email, phone, password, birthday } =
       req.body;
-    const account = new Account({
+    const accountData = {
       first_name,
       last_name,
       email,
       phone,
       password,
       birthday,
-    });
-    await account.save();
-    res.status(201).json(account);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    };
+    const accountCreated = await Account.create(accountData);
+    if (accountCreated) {
+      res.status(201).json({ message: "Account created successfully" });
+    } else {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  } catch (error) {
+    console.error("Error creating account:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// Read Account
+// Get List of Accounts
 router.get("/", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 10;
-    const accounts = await Account.find().limit(limit);
+    const accounts = await Account.findAll(limit);
     res.json(accounts);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Update Account
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { first_name, last_name, email, phone, password, birthday } =
-      req.body;
-    const updatedAccount = await Account.findByIdAndUpdate(
-      id,
-      { first_name, last_name, email, phone, password, birthday },
-      { new: true }
-    );
-    res.json(updatedAccount);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Delete Account
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Account.findByIdAndDelete(id);
-    res.status(204).end();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("Error getting accounts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

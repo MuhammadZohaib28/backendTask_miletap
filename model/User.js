@@ -1,14 +1,33 @@
+// models/User.js
+const db = require("../db/db.js");
+const bcrypt = require("bcrypt");
 
-const mongoose = require("mongoose");
-
-const userSchema = new mongoose.Schema(
-  {
-    email: { type: String, unique: true },
-    password: String,
+const User = {
+  async create(email, password) {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await db.run("INSERT INTO User (email, password) VALUES (?, ?)", [
+        email,
+        hashedPassword,
+      ]);
+      return true;
+    } catch (error) {
+      console.error("Error creating user:", error);
+      return false;
+    }
   },
-  { timestamps: true }
-);
 
-const User = mongoose.model("User", userSchema);
+  async findByEmail(email) {
+    return new Promise((resolve, reject) => {
+      db.get("SELECT * FROM User WHERE email = ?", [email], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  },
+};
 
 module.exports = User;
