@@ -6,6 +6,22 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/User.js");
 const config = require("../config");
 
+const secretKey = config.JWT_SECRET;
+
+function generateToken(user) {
+  // Payload for the JWT token
+  const payload = {
+    userId: user.id,
+    email: user.email
+
+  };
+
+  // Generating the JWT token
+  const token = jwt.sign(payload, secretKey, { expiresIn: '1h' }); // Token expires in 1 hour
+
+  return token;
+}
+
 //******************************************* */ User Registration Endpoint *******************************************//
 router.post("/register", async (req, res) => {
   try {
@@ -21,8 +37,12 @@ router.post("/register", async (req, res) => {
     // Hash the password - Here the password is hashed using bcrypt.
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // const isPasswordValid = await bcrypt.compare(password, hashedPassword);
+
+    // console.log(isPasswordValid, hashedPassword)
+
     // Create new user
-    const userCreated = await User.create(email, hashedPassword);
+    const userCreated = await User.create(email, password);
     if (!userCreated) {
       return res.status(500).json({ error: "Failed to register user" });
     }
@@ -46,6 +66,10 @@ router.post("/login", async (req, res) => {
 
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    console.log(password, user.password, hashedPassword, isPasswordValid, "isPasswordValid")
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid credentials - Password" });
     }
@@ -60,3 +84,7 @@ router.post("/login", async (req, res) => {
 
 
 module.exports = router;
+
+//  $2b$10$wfFumCspbZXfDPI2LEs1u.sbS6gAcJa5DEZs1SEWPl6iBPWvsq.b6
+
+// '$2b$10$15lMJ4Q42aJnIigSbldDR.MMXGf0oPYb7MsdnCpugxg4apEUMUc.2

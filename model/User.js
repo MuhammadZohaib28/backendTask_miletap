@@ -18,7 +18,7 @@ const User = {
   },
 
   async findByEmail(email) {
-    return new Promise((resolve, reject) => {
+    const response = await new Promise((resolve, reject) => {
       db.get("SELECT * FROM User WHERE email = ?", [email], (err, row) => {
         if (err) {
           reject(err);
@@ -27,6 +27,8 @@ const User = {
         }
       });
     });
+    console.log(response, "RES: ")
+    return response
   },
 };
 
