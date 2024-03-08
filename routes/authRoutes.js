@@ -9,15 +9,13 @@ const config = require("../config");
 const secretKey = config.JWT_SECRET;
 
 function generateToken(user) {
-  // Payload for the JWT token
+
   const payload = {
     userId: user.id,
     email: user.email
-
   };
 
-  // Generating the JWT token
-  const token = jwt.sign(payload, secretKey, { expiresIn: '1h' }); // Token expires in 1 hour
+  const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
 
   return token;
 }
