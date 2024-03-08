@@ -12,7 +12,8 @@ router.post("/register", async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findByEmail(email);
+
     if (existingUser) {
       return res.status(400).json({ error: "Email already registered" });
     }
@@ -21,8 +22,10 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
-    const newUser = new User({ email, password: hashedPassword });
-    await newUser.save();
+    const userCreated = await User.create(email, hashedPassword);
+    if (!userCreated) {
+      return res.status(500).json({ error: "Failed to register user" });
+    }
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
@@ -36,26 +39,24 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     // Check if user exists
-    const user = await User.findOne({ email });
+    const user = await User.findByEmail(email);
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials - Maybe User Doesn't exist" });
     }
 
     // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials - Password" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, config.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.json({ token });
+    // If user is found and password is valid, return success message along with token
+    return res.json({ message: "Login successful", token: generateToken(user) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 module.exports = router;
